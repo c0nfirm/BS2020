@@ -28,7 +28,7 @@ void print_P(){                          /*prints . to hide the password*/
 
 char get_input(){                        /*get Keyboard input*/                                 /*wartet evt net auf user input*/
     char c;                              /*variable to save keyboard input*/
-    asm (
+    asm (                                                                                       /*muss evt vollatile sein*/
         "mov %%ah, 1;"                   /*loading function 01h into register AH*/
         "int $0x16;"                     /*interrupt 16h (keyboard services)*/
         :"=r"(c)                         /*saving the pressed key(ASCII code) into c*/
