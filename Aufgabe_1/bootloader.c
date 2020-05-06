@@ -65,14 +65,14 @@ int hidden_p_input(){                    /*only works with return type int for s
 }
 
 void os(){
-	/*bool run = true;*/
+	bool run = true;
 
-	print_s(newLine,2);
 	print_s("Hello!\n",8);
 
-	/*while(run = true){
-
-	}*/
+	while(run){
+		hidden_p_input();
+		print_s(newLine, 2);
+	}
 }
 
 void main(void){
@@ -80,8 +80,8 @@ void main(void){
 		"mov $0x007, %%ebx;"
 		/*"mov $0xE4E, %%eax; int $0x10;"
 		"mov $0xE69, %%eax; int $0x10;"
-		"mov $0xE63, %%eax; int $0x10;"
-		"mov $0xE65, %%eax; int $0x10;"
+		"mov $0xE63, %%eax; int $0x10;"		"Nice Boot" message
+		"mov $0xE65, %%eax; int $0x10;"		Nicht die geforderte ausgabe
 		"mov $0xE20, %%eax; int $0x10;"
 		"mov $0xE42, %%eax; int $0x10;"
 		"mov $0xE6F, %%eax; int $0x10;"
