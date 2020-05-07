@@ -44,23 +44,23 @@ char get_input(){                        /*get Keyboard input*/                 
 }
 
 int hidden_p_input(){                    /*only works with return type int for some reason (every enter reboots?!)*/
-    char pass[9];
-    for (int i=0; i<=8; i++){
+    char pass[8];
+    for (int i=0; i<=7; i++){
         char tmp = get_input();
         if(i==0 && tmp==13){
             reboot();                   /*empty string  and enter*/
         }
         pass[i]=tmp;
         if(tmp==13){                    /*shorter password than max size*/
-            print_s(newLine, 2);
-            print_s(pass, 8);
+            print_s(newLine, 1);
+            print_s(pass, i);
             return 1;
         }
         pass[i]=tmp;
         print_p();                      /*prints . for the password*/
     }
-    print_s(newLine, 2);
-    print_s(pass, 8);
+    print_s(newLine, 1);
+    print_s(pass, 7);
     return 0;
 }
 
@@ -71,7 +71,7 @@ void os(){
 
 	while(run){
 		hidden_p_input();
-		print_s(newLine, 2);
+		print_s(newLine, 1);
 	}
 }
 
