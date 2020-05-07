@@ -47,8 +47,8 @@ int hidden_p_input(){                    /*only works with return type int for s
     char pass[8];
     for (int i=0; i<=7; i++){
         char tmp = get_input();
-        if(i==0 && tmp==13){
-            reboot();                   /*empty string  and enter*/
+        if(i==0 && tmp==13){             /*empty string  and enter*/
+            reboot();                   
         }
         pass[i]=tmp;
         if(tmp==13){                    /*shorter password than max size*/
@@ -59,8 +59,10 @@ int hidden_p_input(){                    /*only works with return type int for s
         pass[i]=tmp;
         print_p();                      /*prints . for the password*/
     }
+    
     print_s(newLine, 1);
     print_s(pass, 7);
+
     return 0;
 }
 
