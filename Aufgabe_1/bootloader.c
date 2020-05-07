@@ -31,9 +31,9 @@ void print_p(){                          /*prints . to hide the password*/
     print_c(46);                         /*ASCII code for . */
 }
 
-char get_input(){                        /*get Keyboard input*/                                 /*wartet evt net auf user input*/
+char get_input(){                        /*get Keyboard input*/
     char c;                              /*variable to save keyboard input*/
-    asm volatile(                                                                                       /*muss evt vollatile sein*/
+    asm volatile(
         "mov %%ah, 1;"                   /*loading function 01h into register AH*/
         "int $0x16;"                     /*interrupt 16h (keyboard services)*/
         :"=r"(c)                         /*saving the pressed key(ASCII code) into c*/
@@ -45,10 +45,12 @@ char get_input(){                        /*get Keyboard input*/                 
 
 int hidden_p_input(){                    /*only works with return type int for some reason (every enter reboots?!)*/
     char pass[8];
+    bool ent = true;
+
     for (int i=0; i<=7; i++){
         char tmp = get_input();
         if(i==0 && tmp==13){             /*empty string  and enter*/
-            reboot();                   
+            reboot();
         }
         pass[i]=tmp;
         if(tmp==13){                    /*shorter password than max size*/
@@ -59,9 +61,16 @@ int hidden_p_input(){                    /*only works with return type int for s
         pass[i]=tmp;
         print_p();                      /*prints . for the password*/
     }
-    
-    print_s(newLine, 1);
-    print_s(pass, 7);
+
+    while(ent){
+        char tmp1 = get_input();
+        print_c(32);
+        if(tmp1==13){
+            print_s(newLine, 1);
+            print_s(pass, 7);
+            ent = false;
+        }
+    }  
 
     return 0;
 }
@@ -73,29 +82,19 @@ void os(){
 
 	while(run){
 		hidden_p_input();
-		print_s(newLine, 1);
+        print_s(newLine, 1);
 	}
 }
 
 void main(void){
 	asm(
 		"mov $0x007, %%ebx;"
-		/*"mov $0xE4E, %%eax; int $0x10;"
-		"mov $0xE69, %%eax; int $0x10;"
-		"mov $0xE63, %%eax; int $0x10;"		"Nice Boot" message
-		"mov $0xE65, %%eax; int $0x10;"		Nicht die geforderte ausgabe
-		"mov $0xE20, %%eax; int $0x10;"
-		"mov $0xE42, %%eax; int $0x10;"
-		"mov $0xE6F, %%eax; int $0x10;"
-		"mov $0xE6F, %%eax; int $0x10;"
-		"mov $0xE74, %%eax; int $0x10;"
-		"mov $0xE73, %%eax; int $0x10;"*/
 		::: "eax", "ebx"
 	);
 
 	os();
 
-	asm(	
+	asm(
 		"jmp .;"
 	);
 }
