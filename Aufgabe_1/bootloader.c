@@ -65,6 +65,7 @@ int hidden_p_input(){                    /*only works with return type int for s
     while(ent){                         /*max pw print to screen only when pressing enter*/
         char tmp1 = get_input();
         print_c(32);                   /*akzeptiert ohne diese ausgabe kein enter (CR) nach eingabe eines anderen buchstabens*/
+        print_c(8);                    /*Backspace to cover  up additional chracters while waiting for enter key*/
         if(tmp1==13){
             print_s(newLine, 1);
             print_s(pass, 7);
