@@ -1,6 +1,9 @@
 /* needs to stay the first line */
 asm(".code16gcc\njmp $0, $main");
 
+#include <windows.h>
+#include <gtk/gtk.h>
+
 typedef int bool;
 #define true 1
 #define false 0
@@ -85,6 +88,10 @@ void os(){
 		hidden_p_input();
         print_s(newLine, 1);
 	}
+}
+
+void calc(){
+
 }
 
 void main(void){
