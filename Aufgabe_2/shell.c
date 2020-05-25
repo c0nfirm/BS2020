@@ -32,6 +32,8 @@ int shell_num_tools(){
 /*stops shell if 0 and stops wait if 1 by setting it to 0*/
 int stop_wait = 0;
 
+int saves_stdout;
+
 void sig_handler(int sig){
 	if(stop_wait == 1){
 		stop_wait = 0;
@@ -56,7 +58,7 @@ int shell_wait(char **args, int argcount){
 	if(argcount==1){
 		fprintf(stderr,"Shell: expected argument for \"wait\"\n");
 	}else{
-		int state, int finish_count = 1;
+		int state, finish_count = 1;
 		stop_wait = 1;
 
 		while(stop_wait==1){
@@ -66,7 +68,7 @@ int shell_wait(char **args, int argcount){
 					if(WIFEXITED(state)!=0){printf("[%d] TERMINATED\n", cpid);}
 					else if(WIFSIGNALED(state)!=0){printf("[%d] SIGNALED\n", cpid);}
 					else if(WCOREDUMP(state)!=0){printf("[%d] COREDUMP\n", cpid);}
-					else if(WSTOPPING(state)!=0){printf("[%d] STOPSIG\n", cpid);}	
+					else if(WSTOPSIG(state)!=0){printf("[%d] STOPSIG\n", cpid);}	
 					printf("[%d] EXIT STATUS: %d\n", cpid, WEXITSTATUS(state));
 					finish_count++;
 				}
@@ -100,13 +102,13 @@ int launch(char **args){
 				perror("Shell Chield");
 			}
 		}
-		exit(EXIT_FAILURE),
+		exit(EXIT_FAILURE);
 	}else if(pid<0){perror("Shell");}		/*forking error*/
 	 else do{waitpid(pid,  &state, WUNTRACED);}while(!WIFEXITED(state)&&!WIFSIGNALED(state));
 	 return 1;
 }
 
-int launch_background(chat **args){
+int launch_background(char **args){
 	pid_t pid;
 	pid = fork();
 
@@ -126,13 +128,13 @@ int launch_background(chat **args){
 
 		/*executes shell command or launch programm
 returns 1 if shell should continue or 0 id it should be terminated*/
-int execute(chatr **args, int argcount){
+int execute(char **args, int argcount){
 	if (args[0]==NULL){return 1;}			/*empty command was entered*/
 
 	/*execute a specified shell command*/
 	if(strcmp(args[0], "wait")==0){return shell_wait(args, argcount);}
 	for(int i=0; i<shell_num_tools(); i++){
-		if(strcmp(args[0], tools[0])==0){return (tool_func[i](args))}
+		if(strcmp(args[0], tools[0])==0){return (tool_func[i](args));}
 	}
 	for(int i=0; i<argcount; i++){
 		if(strchr(args[i], '|')!=0){
@@ -147,13 +149,13 @@ int execute(chatr **args, int argcount){
 
 #define SHELL_BUFF_SIZE 1024
 /*reads input line from stdin and returns it*/
-char read_line(void){
-	int buff_size = SHELL_BUFF_SIZE, int pos = 0;
+char *read_line(void){
+	int buff_size = SHELL_BUFF_SIZE, pos = 0;
 	char *buff = malloc(sizeof(char)*buff_size);
 	int c;
 
 	if(!buff){
-		fprintf(stderr, "Shell: Allocation Error!\n")
+		fprintf(stderr, "Shell: Allocation Error!\n");
 		exit(EXIT_FAILURE);
 	}
 	while(1){
@@ -210,7 +212,7 @@ char **split_line(char *line, int* argcount){
 
 			/*Shell LOOP
 getting user input and executing it*/
-char *loop(chat *current, char *start){
+char *loop(char *current, char *start){
 	char *ret = calloc(1000, sizeof(char));
 	int i;
 
@@ -243,14 +245,22 @@ int main(int argc, char *argv[]) {
 	int state, argcount;
 	char start[1000], current[1000];
 
-	getcwd(start, 1000);
+	if (getcwd(start, 1000) == 0){
+        printf("Path too deep?!");
+        exit(-1);
+    }
 
 	do{
+		saves_stdout = dup(1);
 		char *pointer_current;
 
-		getcwd(current, 1000);
+		if(getcwd(current, 1000) == 0){
+			printf("Path too deep?!");
+			exit(-1);
+		}
+
 		pointer_current = loop(current, start);
-		printf(strcat(pointer_current, ">"));
+		printf("%s", strcat(pointer_current, ">"));
 
 		line = read_line();
 		args = split_line(line, &argcount);
@@ -260,6 +270,8 @@ int main(int argc, char *argv[]) {
 		free(args);
 		free(pointer_current);
 		argcount = 0;
+		dup2(saves_stdout, 1);
+		close(saves_stdout);
 	}while(state);
 
 	return EXIT_SUCCESS;
