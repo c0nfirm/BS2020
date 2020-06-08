@@ -288,38 +288,6 @@ void execute(char **args, FILE *write_fh, FILE *read_fh, Server *s)
 	return launch(args);
 }
 
-int main(int argc, char **argv)
-{
-	Server *s = malloc(sizeof(Server));
-
-	// Initialize Server structure
-	s->num_workers = 0;
-	s->shutdown_requested = 0;
-	s->last_message_timestamp = clock();
-	pthread_mutex_init(&s->lock, NULL);
-	pthread_cond_init(&s->cond, NULL);
-
-	// Start server thread
-	pthread_t thr;
-	pthread_create(&thr, NULL, &server, s);
-
-	// Wait for shutdown and for workers to finish
-	pthread_mutex_lock(&s->lock);
-	while (!s->shutdown_requested || s->num_workers > 0)
-	{
-		pthread_cond_wait(&s->cond, &s->lock);
-	}
-	pthread_mutex_unlock(&s->lock);
-
-	// Join server thread
-	pthread_join(thr, NULL);
-
-	// Free Server structure
-	free(s);
-
-	return 0;
-}
-
 void *server(void *arg)
 {
 	Server *s = arg;
@@ -520,4 +488,37 @@ void *worker(void *arg)
 	pthread_mutex_unlock(&s->lock);
 
 	return NULL;
+}
+
+
+int main(int argc, char **argv)
+{
+	Server *s = malloc(sizeof(Server));
+
+	// Initialize Server structure
+	s->num_workers = 0;
+	s->shutdown_requested = 0;
+	s->last_message_timestamp = clock();
+	pthread_mutex_init(&s->lock, NULL);
+	pthread_cond_init(&s->cond, NULL);
+
+	// Start server thread
+	pthread_t thr;
+	pthread_create(&thr, NULL, &server, s);
+
+	// Wait for shutdown and for workers to finish
+	pthread_mutex_lock(&s->lock);
+	while (!s->shutdown_requested || s->num_workers > 0)
+	{
+		pthread_cond_wait(&s->cond, &s->lock);
+	}
+	pthread_mutex_unlock(&s->lock);
+
+	// Join server thread
+	pthread_join(thr, NULL);
+
+	// Free Server structure
+	free(s);
+
+	return 0;
 }
